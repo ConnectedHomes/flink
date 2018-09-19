@@ -1,3 +1,31 @@
+# Boiler IQ fork of Apache Flink
+
+Unfortunately, the Kinesis flink connector depends on two libraries by AWS that are licensed differently to the AWS SDK, so a pre-built `.jar` is not provided (see https://ci.apache.org/projects/flink/flink-docs-stable/dev/connectors/kinesis.html for more details).
+
+We needed to make some small tweaks to the build of the project, and felt it was worth doing this in a fork rather than trying to `bash` an upstream checkout into shape. The changes we've made are:
+* Update to scala 2.11
+* Disable a project that reliably causes the build to fail
+* Update the AWS SDK that the project depends on to `1.11.406` (the old version didn't work).
+
+## Building
+
+```
+mvn clean install -Pinclude-kinesis -Pscala-2.11 -Daws.kinesis-kcl.version=1.9.1 -Daws.kinesis-kpl.version=0.12.9 -DskipTests -Dcheckstyle.skip -pl flink-connectors/flink-connector-kinesis -am
+```
+
+At time of writing, this is set up [in a jenkins job](https://jenkins.connectedboiler.com/job/flink-connector-kinesis/configure)
+
+### Parameters of interest:
+
+* `-Daws.kinesis-kpl.version` - set this to the version of the [Kinesis Producer Library](https://docs.aws.amazon.com/streams/latest/dev/developing-producers-with-kpl.html) required.
+* `-Daws.kinesis-kcl.version` - set this to the version of the [Kinesis Consumer Library](https://docs.aws.amazon.com/streams/latest/dev/kinesis-record-processor-implementation-app-java.html) required.
+
+### Parameters of speed:
+
+`-DskipTests -Dcheckstyle.skip -pl flink-connectors/flink-connector-kinesis -am` try to cut down the time it takes to produce a build by skipping unneeded projects and goals. If anything goes wrong with the build, that's probably a good place to start.
+
+----
+
 # Apache Flink
 
 Apache Flink is an open source stream processing framework with powerful stream- and batch-processing capabilities.
